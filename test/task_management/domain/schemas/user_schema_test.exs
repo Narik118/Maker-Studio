@@ -68,7 +68,7 @@ defmodule TaskManagement.Domain.Schemas.UserSchemaTest do
     test "ensures email uniqueness" do
       existing_user_attrs = %{name: "existing user", email: "unique@example.com"}
 
-      {:ok, existing_user} =
+      {:ok, _existing_user} =
         %UserSchema{}
         |> UserSchema.changeset(existing_user_attrs)
         |> Repo.insert()
