@@ -21,9 +21,17 @@ defmodule TaskManagementWeb.Router do
   end
 
   # Other scopes may use custom stacks.
-  # scope "/api", TaskManagementWeb do
-  #   pipe_through :api
-  # end
+  scope "/api/v1", TaskManagementWeb do
+    pipe_through :api
+
+    post "/users", User.UserController, :create
+    post "/users/:user_id/tasks", Task.TaskController, :create
+    get "/users/:user_id/tasks", Task.TaskController, :get_all_tasks
+    get "/users/:user_id/tasks/:task_id", Task.TaskController, :get_task
+    put "/users/:user_id/tasks/:task_id", Task.TaskController, :update_task
+    delete "/users/:user_id/tasks/:task_id", Task.TaskController, :delete_task
+    # match :*, "/", ErrorController, :not_found
+  end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
   if Application.compile_env(:task_management, :dev_routes) do
