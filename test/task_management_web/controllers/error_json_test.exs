@@ -2,7 +2,9 @@ defmodule TaskManagementWeb.ErrorJSONTest do
   use TaskManagementWeb.ConnCase, async: true
 
   test "renders 404" do
-    assert TaskManagementWeb.ErrorJSON.render("404.json", %{}) == %{errors: %{detail: "Not Found"}}
+    assert TaskManagementWeb.ErrorJSON.render("404.json", %{}) == %{
+             errors: %{detail: "Not Found"}
+           }
   end
 
   test "renders 500" do
