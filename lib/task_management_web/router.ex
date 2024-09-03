@@ -1,6 +1,8 @@
 defmodule TaskManagementWeb.Router do
   use TaskManagementWeb, :router
 
+  import TaskManagementWeb.Plug.UserAuth
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
@@ -8,10 +10,12 @@ defmodule TaskManagementWeb.Router do
     plug :put_root_layout, html: {TaskManagementWeb.Layouts, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
+    plug :fetch_current_user
   end
 
   pipeline :api do
     plug :accepts, ["json"]
+    plug :fetch_current_user
   end
 
   scope "/", TaskManagementWeb do
