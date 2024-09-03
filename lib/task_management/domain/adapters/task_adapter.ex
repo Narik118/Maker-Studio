@@ -28,10 +28,12 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapter do
   @doc """
   update user's task by task id
   """
-  def update_task_by_id(user_id, task_id, attrs) do # update_task as fun name
+  # update_task as fun name
+  def update_task(user_id, task_id, attrs) do
     with {:ok, task} <- get_task_by_id(user_id, task_id),
-         {:ok, %TaskSchema{user_id: ^user_id}} <- update_task(task, attrs) do
-      {:ok, :updated} #return updated task
+         {:ok, %TaskSchema{user_id: ^user_id} = updated_task} <- update_task(task, attrs) do
+      # return updated task
+      {:ok, updated_task}
     else
       {:error, :not_found} ->
         {:error, :not_found}
@@ -64,19 +66,19 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapter do
     |> Repo.all()
   end
 
-  def delete_task_by_id(task_id) do #user_id and task_id and use with
-    case Repo.get(TaskSchema, task_id) do
+  @doc """
+  deletes a task
+  """
+  def delete_task(user_id, task_id) do
+    with {:ok, task} <- get_task_by_id(user_id, task_id),
+         {:ok, deleted_task} <- Repo.delete(task) do
+      {:ok, deleted_task}
+    else
       nil ->
         {:error, :not_found}
 
-      task ->
-        case Repo.delete(task) do
-          {:ok, _deleted_task} ->
-            {:ok, task}
-
-          {:error, _changeset} ->
-            {:error, :delete_failed}
-        end
+      {:error, _changeset} ->
+        {:error, :delete_failed}
     end
   end
 end

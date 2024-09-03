@@ -62,3 +62,8 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
+
+config :joken,
+  # get it from system variable in prod use
+  default_signer: "seklfhdskghdsmngsdjgsldknglksdjgoihgdslnglsdgdsjgsdgjkdgiusglskngson",
+  default_exp: 3600

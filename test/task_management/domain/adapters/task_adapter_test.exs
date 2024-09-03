@@ -76,11 +76,7 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapterTest do
         "status" => "Done"
       }
 
-      assert {:ok, :updated} = TaskAdapter.update_task_by_id(user_id, task.id, updated_attrs)
-
-      updated_task = Repo.get(TaskSchema, task.id)
-      assert updated_task.title == "Updated Task"
-      assert updated_task.status == "Done"
+      assert {:ok, %TaskSchema{title: "Updated Task", status: "Done"}} = TaskAdapter.update_task(user_id, task.id, updated_attrs)
     end
 
     test "returns :error, :unknown_error if the task exists but update fails", %{
@@ -88,7 +84,7 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapterTest do
       task: task
     } do
       assert {:error, :unknown_error} =
-               TaskAdapter.update_task_by_id(user_id, task.id, %{"title" => ""})
+               TaskAdapter.update_task(user_id, task.id, %{"title" => ""})
     end
   end
 
@@ -117,15 +113,14 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapterTest do
   end
 
   describe "delete_task_by_id/1" do
-    test "deletes a task by id", %{task: task} do
-      assert {:ok, %TaskSchema{} = deleted_task} = TaskAdapter.delete_task_by_id(task.id)
+    test "deletes a task by id", %{user_id: user_id, task: task} do
+      assert {:ok, %TaskSchema{} = deleted_task} = TaskAdapter.delete_task(user_id, task.id)
       assert deleted_task.id == task.id
       assert Repo.get(TaskSchema, task.id) == nil
     end
 
-    test "returns :error, :not_found if the task does not exist" do
-      # not existing task id
-      assert {:error, :not_found} = TaskAdapter.delete_task_by_id("3286329875")
+    test "returns :error, :not_found if the task does not exist", %{user_id: user_id} do
+      assert {:error, :delete_failed} = TaskAdapter.delete_task(user_id, "3286329875")
     end
   end
 end

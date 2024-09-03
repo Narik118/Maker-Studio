@@ -12,7 +12,8 @@ defmodule TaskManagement.Domain.Adapters.UserAdapter do
   def insert_user(attrs) do
     %UserSchema{}
     |> UserSchema.changeset(attrs)
-    |> Repo.insert() #try inster
+    # try inster
+    |> Repo.insert()
   end
 
   @doc """
