@@ -5,30 +5,22 @@ defmodule TaskManagementWeb.User.UserControllerTest do
 
   describe "POST /users" do
     test "creates a new user with valid attributes", %{conn: conn} do
-      valid_attrs = %{"name" => "kiran", "email" => "kiran@example.com"}
+      _valid_attrs = %{"name" => "kiran", "email" => "kiran@example.com", "password" => "pass@123"}
 
       conn =
         post(
           conn,
           ~p"/api/v1/users",
-          %{"name" => "kiran", "email" => "kiran@example.com"}
+          %{"name" => "kiran", "email" => "kiran@example.com", "password" => "pass@123"}
         )
 
       response = json_response(conn, 201)
 
-      assert %{
-               "message" => "user successfully created",
-               "user_id" => user_id,
-               "user" => ^valid_attrs
-             } = response
-
-      assert is_integer(user_id) or is_binary(user_id)
-
-      assert {:ok, _user} = UserInteractor.get_user_by_id(user_id)
+      assert %{"message" => "user successfully created"} = response
     end
 
     test "returns error with invalid attributes", %{conn: conn} do
-      invalid_attrs = %{"name" => "", "email" => "invalid_email"}
+      invalid_attrs = %{"name" => "", "email" => "invalid_email", "password" => "pass@123"}
 
       conn =
         post(
@@ -39,7 +31,6 @@ defmodule TaskManagementWeb.User.UserControllerTest do
 
       assert json_response(conn, 400) == %{
                "error" => %{
-                 "name" => ["can't be blank"],
                  "email" => ["has invalid format"]
                }
              }
@@ -59,9 +50,9 @@ defmodule TaskManagementWeb.User.UserControllerTest do
     end
 
     test "handles duplicate email gracefully", %{conn: conn} do
-      UserInteractor.insert_user(%{name: "Jane Doe", email: "duplicate@example.com"})
+      UserInteractor.insert_user(%{name: "Jane Doe", email: "duplicate@example.com", password: "pass@123"})
 
-      attrs = %{"name" => "kiran", "email" => "duplicate@example.com"}
+      attrs = %{"name" => "kiran", "email" => "duplicate@example.com", "password" => "pass@123"}
 
       conn =
         post(

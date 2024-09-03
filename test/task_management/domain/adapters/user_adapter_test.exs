@@ -90,7 +90,7 @@ defmodule TaskManagement.Domain.Adapters.UserAdapterTest do
 
       {:ok, user} = UserAdapter.insert_user(attrs)
 
-      assert %UserSchema{id: id} = user
+      assert %UserSchema{id: _id} = user
 
       assert {:ok, %UserSchema{name: "kiran", email: "kiran@example.com"} = _user} =
                UserAdapter.get_user_by_email(user.email)

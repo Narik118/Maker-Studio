@@ -1,19 +1,24 @@
 defmodule TaskManagementWeb.Task.TaskControllerTest do
   use TaskManagementWeb.ConnCase, async: true
 
-  alias TaskManagementWeb.Auth.TokenClient
   alias TaskManagement.Domain.Interactors.{TaskInteractor, UserInteractor}
 
   setup do
-    user_attrs = %{"name" => "John Doe", "email" => "john.doe@example.com"}
-    {:ok, user} = UserInteractor.insert_user(user_attrs)
-    user_id = user.id
-    token = TokenClient.generate_new_token(user_id)
-    %{user_id: user_id, token: token}
+    user_attrs = %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "pass@123"}
+    {:ok, _user} = UserInteractor.insert_user(user_attrs)
+    %{email: user_attrs["email"], password: user_attrs["password"]}
   end
 
   describe "POST /users/:user_id/tasks" do
-    test "creates a new task with valid attributes", %{conn: conn, user_id: user_id, token: token} do
+    test "creates a new task with valid attributes", %{conn: conn, email: email, password: password} do
+      signin_response =
+        post(
+          conn,
+          ~p"/api/v1/signin",
+          %{"email" => email, "password" => password}
+        )
+      assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
+
       valid_attrs = %{
         "description" => "Task description",
         "due_date" => ~U[2024-12-31T23:59:59Z],
@@ -21,6 +26,7 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
         "title" => "Task title",
         "user_id" => user_id
       }
+
 
       conn =
         post(
@@ -41,7 +47,22 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
       assert {:ok, _task} = TaskInteractor.get_task_by_id(user_id, task_id)
     end
 
-    test "handles missing parameters gracefully", %{conn: conn, user_id: user_id, token: token} do
+    test "handles missing parameters gracefully", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
+
+    _valid_attrs = %{
+      "description" => "Task description",
+      "due_date" => ~U[2024-12-31T23:59:59Z],
+      "status" => "To Do",
+      "title" => "Task title",
+      "user_id" => user_id
+    }
       conn =
         post(
           conn
@@ -55,7 +76,15 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              }
     end
 
-    test "handles unauthorized access due to invalid token", %{conn: conn, user_id: user_id} do
+    test "handles unauthorized access due to invalid token", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => _token} = json_response(signin_response, 200)
+
       invalid_token = "invalid-token"
 
       invalid_attrs = %{
@@ -81,7 +110,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
   end
 
   describe "GET /users/:user_id/tasks/:task_id" do
-    test "retrieves a specific task", %{conn: conn, user_id: user_id, token: token} do
+    test "retrieves a specific task", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       # Create a task for the user
       {:ok, task} =
         TaskInteractor.insert_task(%{
@@ -115,7 +151,15 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              } = response
     end
 
-    test "returns error for a non-existent task", %{conn: conn, user_id: user_id, token: token} do
+    test "returns error for a non-existent task", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
+
       conn =
         get(
           conn
@@ -128,7 +172,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              }
     end
 
-    test "handles unauthorized access due to invalid token", %{conn: conn, user_id: user_id} do
+    test "handles unauthorized access due to invalid token", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => _token} = json_response(signin_response, 200)
       invalid_token = "invalid-token"
 
       conn =
@@ -145,11 +196,15 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
   end
 
   describe "PUT /users/:user_id/tasks/:task_id" do
-    test "successfully updates a task with valid parameters", %{
-      conn: conn,
-      user_id: user_id,
-      token: token
-    } do
+    test "successfully updates a task with valid parameters", %{conn: conn, email: email, password: password}  do
+
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       # Create a task for the user
       {:ok, task} =
         TaskInteractor.insert_task(%{
@@ -193,7 +248,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              } = response
     end
 
-    test "returns error with invalid task_id", %{conn: conn, user_id: user_id, token: token} do
+    test "returns error with invalid task_id", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       invalid_update_attrs = %{
         "title" => "Updated title",
         "user_id" => user_id
@@ -210,7 +272,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
       assert json_response(conn, 400) == %{"error" => "Invalid request body."}
     end
 
-    test "returns error with missing parameters", %{conn: conn, user_id: user_id, token: token} do
+    test "returns error with missing parameters", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       conn =
         put(
           conn
@@ -224,7 +293,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              }
     end
 
-    test "returns error for unauthorized update attempt", %{conn: conn, user_id: user_id} do
+    test "returns error for unauthorized update attempt", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => _token} = json_response(signin_response, 200)
       # Create a task for the user
       {:ok, task} =
         TaskInteractor.insert_task(%{
@@ -262,7 +338,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
   end
 
   describe "DELETE /users/:user_id/tasks/:task_id" do
-    test "successfully deletes a task", %{conn: conn, user_id: user_id, token: token} do
+    test "successfully deletes a task", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       # Create a task for the user
       {:ok, task} =
         TaskInteractor.insert_task(%{
@@ -292,7 +375,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
              } = response
     end
 
-    test "returns error for non-existent task", %{conn: conn, user_id: user_id, token: token} do
+    test "returns error for non-existent task", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => token} = json_response(signin_response, 200)
       conn =
         delete(
           conn
@@ -303,7 +393,14 @@ defmodule TaskManagementWeb.Task.TaskControllerTest do
       assert json_response(conn, 400) == %{"error" => "delete_failed"}
     end
 
-    test "returns error for unauthorized delete attempt", %{conn: conn, user_id: user_id} do
+    test "returns error for unauthorized delete attempt", %{conn: conn, email: email, password: password} do
+      signin_response =
+      post(
+        conn,
+        ~p"/api/v1/signin",
+        %{"email" => email, "password" => password}
+      )
+    assert %{"user_id" => user_id, "token" => _token} = json_response(signin_response, 200)
       # Create a task for the user
       {:ok, task} =
         TaskInteractor.insert_task(%{
