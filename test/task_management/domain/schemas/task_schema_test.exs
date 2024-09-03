@@ -11,7 +11,8 @@ defmodule TaskManagement.Domain.Schemas.TaskSchemaTest do
       user =
         %UserSchema{
           name: "Test User",
-          email: "testuser@example.com"
+          email: "testuser@example.com",
+          password: "kiran@123"
         }
         |> UserSchema.changeset(%{})
         |> Repo.insert!()
@@ -84,7 +85,6 @@ defmodule TaskManagement.Domain.Schemas.TaskSchemaTest do
     #     |> Repo.insert()
 
     #   assert {:error, changeset} = changeset
-    #   assert %{user_id: ["does not exist"]} = errors_on(changeset)
     # end
 
     test "successfully inserts a task", %{user: user} do

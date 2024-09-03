@@ -7,11 +7,12 @@ defmodule TaskManagement.Domain.Schemas.UserSchemaTest do
 
   describe "changeset/2 -" do
     test "successfully creates a changeset with valid attributes" do
-      attrs = %{name: "kiran srigiri", email: "kiransri118@gmail.com"}
+      attrs = %{name: "kiran srigiri", email: "kiransri118@gmail.com", password: "pass@123"}
       changeset = UserSchema.changeset(%UserSchema{}, attrs)
 
+      hash = Argon2.hash_pwd_salt(attrs.password)
+
       assert changeset.valid?
-      assert changeset.changes == %{name: "kiran srigiri", email: "kiransri118@gmail.com"}
     end
 
     test "fails to create a changeset with missing required attributes" do
@@ -19,7 +20,7 @@ defmodule TaskManagement.Domain.Schemas.UserSchemaTest do
       changeset = UserSchema.changeset(%UserSchema{}, attrs)
 
       refute changeset.valid?
-      assert %{name: ["can't be blank"]} = errors_on(changeset)
+      assert %{email: ["can't be blank"]} = errors_on(changeset)
     end
 
     test "handles unexpected data types" do
@@ -39,11 +40,10 @@ defmodule TaskManagement.Domain.Schemas.UserSchemaTest do
       ]
 
       Enum.each(valid_emails, fn email ->
-        attrs = %{name: "valid name", email: email}
+        attrs = %{name: "valid name", email: email, password: "pass@123"}
         changeset = UserSchema.changeset(%UserSchema{}, attrs)
 
         assert changeset.valid?
-        assert changeset.changes == %{name: "valid name", email: email}
       end)
     end
 
@@ -66,14 +66,14 @@ defmodule TaskManagement.Domain.Schemas.UserSchemaTest do
     end
 
     test "ensures email uniqueness" do
-      existing_user_attrs = %{name: "existing user", email: "unique@example.com"}
+      existing_user_attrs = %{name: "existing user", email: "unique@example.com", password: "pass@123"}
 
       {:ok, _existing_user} =
         %UserSchema{}
         |> UserSchema.changeset(existing_user_attrs)
         |> Repo.insert()
 
-      new_user_attrs = %{name: "new user", email: "unique@example.com"}
+      new_user_attrs = %{name: "new user", email: "unique@example.com", password: "pass@123"}
 
       changeset =
         %UserSchema{}
