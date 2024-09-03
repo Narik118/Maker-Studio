@@ -15,7 +15,8 @@ defmodule TaskManagement.Domain.Adapters.UserAdapterTest do
     test "inserts a valid user" do
       attrs = %{
         name: "kiran",
-        email: "kiran@example.com"
+        email: "kiran@example.com",
+        password: "password@123"
       }
 
       assert {:ok, %UserSchema{id: id}} = UserAdapter.insert_user(attrs)
@@ -45,7 +46,8 @@ defmodule TaskManagement.Domain.Adapters.UserAdapterTest do
     test "ensures email uniqueness" do
       attrs = %{
         name: "kiran",
-        email: "kiran@example.com"
+        email: "kiran@example.com",
+        password: "pass@123"
       }
 
       {:ok, _user} = UserAdapter.insert_user(attrs)
@@ -59,7 +61,8 @@ defmodule TaskManagement.Domain.Adapters.UserAdapterTest do
     test "retrieves a user by id" do
       attrs = %{
         name: "kiran",
-        email: "kiran@example.com"
+        email: "kiran@example.com",
+        password: "pass@123"
       }
 
       {:ok, user} = UserAdapter.insert_user(attrs)
@@ -68,6 +71,29 @@ defmodule TaskManagement.Domain.Adapters.UserAdapterTest do
 
       assert {:ok, %UserSchema{name: "kiran", email: "kiran@example.com"} = _user} =
                UserAdapter.get_user_by_id(id)
+    end
+
+    test "returns {:error, :not_found} if the user does not exist" do
+      non_existent_id = Ecto.UUID.generate()
+
+      assert {:error, :not_found} == UserAdapter.get_user_by_id(non_existent_id)
+    end
+  end
+
+  describe "get_user_by_email/1" do
+    test "retrieves a user by email" do
+      attrs = %{
+        name: "kiran",
+        email: "kiran@example.com",
+        password: "pass@123"
+      }
+
+      {:ok, user} = UserAdapter.insert_user(attrs)
+
+      assert %UserSchema{id: id} = user
+
+      assert {:ok, %UserSchema{name: "kiran", email: "kiran@example.com"} = _user} =
+               UserAdapter.get_user_by_email(user.email)
     end
 
     test "returns {:error, :not_found} if the user does not exist" do

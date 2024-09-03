@@ -12,7 +12,6 @@ defmodule TaskManagement.Domain.Adapters.UserAdapter do
   def insert_user(attrs) do
     %UserSchema{}
     |> UserSchema.changeset(attrs)
-    # try inster
     |> Repo.insert()
   end
 
@@ -22,6 +21,15 @@ defmodule TaskManagement.Domain.Adapters.UserAdapter do
   def get_user_by_id(user_id) do
     UserSchema
     |> where([u], u.id == ^user_id)
+    |> Repo.try_one()
+  end
+
+  @doc """
+  Get's a user by email
+  """
+  def get_user_by_email(email) do
+    UserSchema
+    |> where([u], u.email == ^email)
     |> Repo.try_one()
   end
 end

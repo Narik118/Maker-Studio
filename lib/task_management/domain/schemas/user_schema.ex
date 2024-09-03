@@ -12,6 +12,8 @@ defmodule TaskManagement.Domain.Schemas.UserSchema do
   schema "users" do
     field :name, :string
     field :email, :string
+    field :password_hash, :string
+    field :password, :string, virtual: true
 
     timestamps(type: :utc_datetime_usec)
   end
@@ -21,10 +23,11 @@ defmodule TaskManagement.Domain.Schemas.UserSchema do
   """
   def changeset(user, attrs) do
     user
-    |> cast(attrs, [:name, :email])
-    |> validate_required([:name, :email])
+    |> cast(attrs, [:name, :email, :password])
+    |> validate_required([:email, :password])
     |> validate_email(:email)
     |> unique_constraint([:email])
+    |> hash_password()
   end
 
   @doc """
@@ -33,5 +36,14 @@ defmodule TaskManagement.Domain.Schemas.UserSchema do
   def validate_email(changeset, field) do
     changeset
     |> validate_format(field, @mail_regex)
+  end
+
+  defp hash_password(changeset) do
+    if changeset |> get_change(:password) do
+      changeset
+      |> put_change(:password_hash, Argon2.hash_pwd_salt(get_change(changeset, :password)))
+    else
+      changeset
+    end
   end
 end

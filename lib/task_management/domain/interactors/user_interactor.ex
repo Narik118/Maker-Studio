@@ -6,4 +6,5 @@ defmodule TaskManagement.Domain.Interactors.UserInteractor do
 
   defdelegate insert_user(attrs), to: UserAdapter
   defdelegate get_user_by_id(user_id), to: UserAdapter
+  defdelegate get_user_by_email(email), to: UserAdapter
 end

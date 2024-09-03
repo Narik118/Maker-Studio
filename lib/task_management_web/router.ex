@@ -13,6 +13,12 @@ defmodule TaskManagementWeb.Router do
     plug :fetch_current_user
   end
 
+  # for auth
+  pipeline :api_no_auth do
+    plug :accepts, ["json"]
+  end
+
+  # need auth
   pipeline :api do
     plug :accepts, ["json"]
     plug :fetch_current_user
@@ -24,11 +30,17 @@ defmodule TaskManagementWeb.Router do
     get "/", PageController, :home
   end
 
+  scope "/api/v1", TaskManagementWeb do
+    pipe_through :api_no_auth
+
+    post "/users", User.UserController, :create
+    post "/signin", Auth.SigninController, :signin
+  end
+
   # Other scopes may use custom stacks.
   scope "/api/v1", TaskManagementWeb do
     pipe_through :api
 
-    post "/users", User.UserController, :create
     post "/users/:user_id/tasks", Task.TaskController, :create
     get "/users/:user_id/tasks", Task.TaskController, :get_all_tasks
     get "/users/:user_id/tasks/:task_id", Task.TaskController, :get_task
