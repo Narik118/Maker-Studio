@@ -76,7 +76,8 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapterTest do
         "status" => "Done"
       }
 
-      assert {:ok, %TaskSchema{title: "Updated Task", status: "Done"}} = TaskAdapter.update_task(user_id, task.id, updated_attrs)
+      assert {:ok, %TaskSchema{title: "Updated Task", status: "Done"}} =
+               TaskAdapter.update_task(user_id, task.id, updated_attrs)
     end
 
     test "returns :error, :unknown_error if the task exists but update fails", %{
