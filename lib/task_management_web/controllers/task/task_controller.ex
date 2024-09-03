@@ -73,12 +73,6 @@ defmodule TaskManagementWeb.Task.TaskController do
         conn
         |> put_status(200)
         |> json(resp)
-      else
-        resp = %{message: "Only one task found for the user", tasks: tasks}
-
-        conn
-        |> put_status(200)
-        |> json(resp)
       end
     else
       [] ->

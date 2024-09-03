@@ -10,7 +10,12 @@ defmodule TaskManagement.Domain.Adapters.TaskAdapterTest do
     Ecto.Adapters.SQL.Sandbox.mode(Repo, {:shared, self()})
 
     # Create a user
-    user_attrs = %{"name" => "John Doe", "email" => "john.doe@example.com", "password" => "kiran@123"}
+    user_attrs = %{
+      "name" => "John Doe",
+      "email" => "john.doe@example.com",
+      "password" => "kiran@123"
+    }
+
     {:ok, user} = UserInteractor.insert_user(user_attrs)
     user_id = user.id
 
