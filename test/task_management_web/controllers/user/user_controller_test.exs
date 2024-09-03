@@ -24,7 +24,7 @@ defmodule TaskManagementWeb.User.UserControllerTest do
 
       assert is_integer(user_id) or is_binary(user_id)
 
-      assert UserInteractor.get_user_by_id(user_id)
+      assert {:ok, _user} = UserInteractor.get_user_by_id(user_id)
     end
 
     test "returns error with invalid attributes", %{conn: conn} do
