@@ -4,27 +4,30 @@ defmodule TaskManagementWeb.User.UserController do
   """
   use TaskManagementWeb, :controller
 
-  alias TaskManagementWeb.Auth.TokenClient
   alias TaskManagement.Domain.Interactors.UserInteractor
   alias TaskManagementWeb.ChangesetErrorTranslator
 
   @doc """
   creates a new user
   """
-  def create(%{body_params: %{"name" => name, "email" => email}} = conn, _params) do
+  def create(
+        %{body_params: %{"name" => name, "email" => email, "password" => password}} = conn,
+        _params
+      ) do
     attrs = %{
       name: name,
-      email: email
+      email: email,
+      password: password
     }
 
-    with {:ok, user} <- UserInteractor.insert_user(attrs),
-         token <- TokenClient.generate_new_token(user.id) do
-      resp = %{message: "user successfully created", user_id: user.id, user: attrs, token: token}
+    case UserInteractor.insert_user(attrs) do
+      {:ok, _user} ->
+        resp = %{message: "user successfully created"}
 
-      conn
-      |> put_status(201)
-      |> json(resp)
-    else
+        conn
+        |> put_status(201)
+        |> json(resp)
+
       {:error, %Ecto.Changeset{} = error} ->
         resp = %{error: ChangesetErrorTranslator.translate_error(error)}
 
